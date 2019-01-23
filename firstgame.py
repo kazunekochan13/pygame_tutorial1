@@ -59,6 +59,8 @@ class player(object):
 		# pygame.draw.rect(win, (255, 0, 0), self.hitbox, 2)
 
 	def hit(self):
+		self.isjump = False
+		self.jumpCount = 10
 		self.x = 60
 		self.y = 410
 		self.walkCount = 0
@@ -146,7 +148,7 @@ def redrawGameWindow():
 	global walkCount # uses the walkCount variable from outside the scope of this function instead of instantiating a new one
 	win.blit(bg, (0,0))
 	text = font.render('Score: ' + str(score), 1, (0, 0, 0))
-	win.blit(text, (390, 10))
+	win.blit(text, (350, 10))
 	man.draw(win)
 	for bullet in bullets:
 		bullet.draw(win)
@@ -165,10 +167,11 @@ while run:
 
 	clock.tick(27)
 	
-	if man.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and man.hitbox[1] + man.hitbox[3] > goblin.hitbox[1]:
-		if man.hitbox[0] + man.hitbox[2] > goblin.hitbox[0] and man.hitbox[0] < goblin.hitbox[0] + goblin.hitbox[3]:
-			man.hit()
-			score -=5
+	if goblin.visible:
+		if man.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and man.hitbox[1] + man.hitbox[3] > goblin.hitbox[1]:
+			if man.hitbox[0] + man.hitbox[2] > goblin.hitbox[0] and man.hitbox[0] < goblin.hitbox[0] + goblin.hitbox[3]:
+				man.hit()
+				score -=5
 
 	if shootloop > 0:
 		shootloop += 1
@@ -179,13 +182,15 @@ while run:
 		if event.type == pygame.QUIT:
 			run = False
 
+
 	for bullet in bullets:
 		if bullet.y - bullet.radius < goblin.hitbox[1] + goblin.hitbox[3] and bullet.y + bullet.radius > goblin.hitbox[1]:
 			if bullet.x + bullet.radius > goblin.hitbox[0] and bullet.x - bullet.radius < goblin.hitbox[0] + goblin.hitbox[3]:
-				hitSound.play()
-				goblin.hit()
-				score += 1
-				bullets.pop(bullets.index(bullet))
+				if goblin.visible:
+					hitSound.play()
+					goblin.hit()
+					score += 1
+					bullets.pop(bullets.index(bullet))
 		if bullet.x < screen_x and bullet.x > 0:
 			bullet.x += bullet.vel
 		else:
